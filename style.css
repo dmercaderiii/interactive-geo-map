@@ -1,0 +1,377 @@
+:root {
+    --primary-color: #06b6d4; /* vibrant cyan */
+    --primary-hover: #0891b2;
+    --bg-glass: rgba(15, 23, 42, 0.75); /* Dark slate with opacity */
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --radius-color: #06b6d4;
+    --accent-glow: 0 0 15px rgba(6, 182, 212, 0.5);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0f172a; /* Fallback dark bg */
+    cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJibGFjayIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik0zLDMgTDMsMTkgTDcsMTUgTDEwLDIyIEwxMywyMSBMMTAsMTQgTDE1LDE0IFoiLz48L3N2Zz4=') 3 3, auto !important;
+}
+
+/* Ensure Leaflet container uses our custom cursor instead of grab */
+.leaflet-container {
+    cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJibGFjayIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGQ9Ik0zLDMgTDMsMTkgTDcsMTUgTDEwLDIyIEwxMywyMSBMMTAsMTQgTDE1LDE0IFoiLz48L3N2Zz4=') 3 3, auto !important;
+}
+
+/* But keep interactive elements as pointer */
+a, button, input[type=range], .leaflet-interactive, .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+    cursor: pointer !important;
+}
+
+#map {
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* Glassmorphism Search Container */
+.search-container {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--border-glass);
+    border-radius: 100px;
+    padding: 10px 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.search-box:focus-within {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), var(--accent-glow);
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+.search-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--primary-color);
+    margin: 0 12px 0 4px;
+    filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.4));
+}
+
+#search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-color);
+    outline: none;
+    padding: 8px 0;
+}
+
+#search-input::placeholder {
+    color: #64748b;
+}
+
+#search-btn {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--accent-glow);
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+#search-btn:hover {
+    filter: brightness(1.1);
+}
+
+#search-btn:active {
+    transform: scale(0.96);
+}
+
+/* Error & Loading Status */
+.error-msg {
+    color: #f87171;
+    background: rgba(127, 29, 29, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    align-self: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Spinner */
+.spinner {
+    border: 3px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    border-top: 3px solid var(--primary-color);
+    width: 28px;
+    height: 28px;
+    animation: spin 1s linear infinite;
+    align-self: center;
+    margin-top: 8px;
+    box-shadow: var(--accent-glow);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Customizing Leaflet Popups */
+.leaflet-popup-content-wrapper {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    color: var(--text-color);
+}
+
+.leaflet-popup-tip {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--text-muted);
+    padding: 8px 12px 0 0;
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: var(--text-color);
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 220px;
+    padding: 4px;
+}
+
+.popup-title {
+    font-weight: 500;
+    font-size: 15px;
+    margin: 0;
+    color: var(--text-color);
+    line-height: 1.4;
+}
+
+.popup-coords {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+    font-family: monospace;
+    background: rgba(100, 116, 139, 0.2);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.slider-container label {
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.radius-number-input {
+    width: 65px;
+    padding: 4px 6px;
+    border: 1px solid var(--border-glass);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    background: rgba(0,0,0,0.2);
+    color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.radius-number-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+}
+
+.slider-container input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+.slider-container input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    margin-top: -7px;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+    transition: transform 0.1s;
+}
+
+.slider-container input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.slider-container input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+}
+
+.slider-container input[type=range]:focus {
+    outline: none;
+}
+
+/* Button Styles */
+.export-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: center;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    transition: filter 0.2s, transform 0.1s;
+}
+
+.export-btn:hover {
+    filter: brightness(1.1);
+}
+
+.export-btn:active {
+    transform: scale(0.97);
+}
+
+.remove-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+}
+
+.remove-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+    --primary-color: #4f46e5; 
+    --primary-hover: #4338ca;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --border-glass: rgba(0, 0, 0, 0.15);
+    --text-color: #1f2937;
+    --text-muted: #6b7280;
+    --accent-glow: 0 0 15px rgba(79, 70, 229, 0.3);
+    background: #f3f4f6;
+}
+
+body.light-mode .leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+body.light-mode .radius-number-input {
+    background: white;
+}
+
+body.light-mode .slider-container input[type=range]::-webkit-slider-runnable-track {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Highly readable dark mode map via CSS inversion */
+body:not(.light-mode) .leaflet-tile-pane {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
