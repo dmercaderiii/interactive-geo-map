@@ -74,41 +74,38 @@ function createPin(lat, lng, locationName = "Dropped Pin") {
         <button class="remove-btn" id="remove-btn-${id}">Remove Pin</button>
     `;
 
+    const coordsText = popupContent.querySelector(`#coords-val-${id}`);
+    const slider = popupContent.querySelector(`#radius-slider-${id}`);
+    const valDisplay = popupContent.querySelector(`#radius-val-${id}`);
+    const removeBtn = popupContent.querySelector(`#remove-btn-${id}`);
+
+    const updateRadius = (newRadiusKm) => {
+        if (isNaN(newRadiusKm) || newRadiusKm <= 0) return;
+        pins[id].radiusKm = newRadiusKm;
+        slider.value = newRadiusKm;
+        valDisplay.value = newRadiusKm;
+        circle.setRadius(newRadiusKm * 1000);
+    };
+
+    slider.addEventListener('input', (e) => updateRadius(parseInt(e.target.value)));
+    valDisplay.addEventListener('input', (e) => updateRadius(parseInt(e.target.value)));
+
+    removeBtn.addEventListener('click', () => {
+        map.removeLayer(marker);
+        map.removeLayer(circle);
+        delete pins[id];
+        updateExportButtonVisibility();
+    });
+
     marker.bindPopup(popupContent);
 
     // Update circle and popup coordinates on marker drag
     marker.on('drag', (e) => {
         const newLatLng = e.latlng;
         circle.setLatLng(newLatLng);
-        const coordsText = document.getElementById(`coords-val-${id}`);
         if (coordsText) {
             coordsText.textContent = `${newLatLng.lat.toFixed(5)}, ${newLatLng.lng.toFixed(5)}`;
         }
-    });
-
-    // Event listener for the slider needs to be attached after popup opens
-    marker.on('popupopen', () => {
-        const slider = document.getElementById(`radius-slider-${id}`);
-        const valDisplay = document.getElementById(`radius-val-${id}`);
-        const removeBtn = document.getElementById(`remove-btn-${id}`);
-        
-        const updateRadius = (newRadiusKm) => {
-            if (isNaN(newRadiusKm) || newRadiusKm <= 0) return;
-            pins[id].radiusKm = newRadiusKm;
-            slider.value = newRadiusKm;
-            valDisplay.value = newRadiusKm;
-            circle.setRadius(newRadiusKm * 1000);
-        };
-
-        slider.addEventListener('input', (e) => updateRadius(parseInt(e.target.value)));
-        valDisplay.addEventListener('input', (e) => updateRadius(parseInt(e.target.value)));
-
-        removeBtn.addEventListener('click', () => {
-            map.removeLayer(marker);
-            map.removeLayer(circle);
-            delete pins[id];
-            updateExportButtonVisibility();
-        });
     });
 
     return { marker, circle, id };
