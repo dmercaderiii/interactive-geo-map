@@ -11,11 +11,10 @@ L.control.zoom({
     position: 'bottomright'
 }).addTo(map);
 
-// Use a premium-looking map tile layer (CartoDB Voyager)
-const baseMapLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
+// OpenStreetMap tile layer (CARTO tiles now return an "API KEY REQUIRED" placeholder)
+const baseMapLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
 }).addTo(map);
 
 // Store pins mapping so we can reference them
