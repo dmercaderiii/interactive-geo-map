@@ -11,10 +11,18 @@ L.control.zoom({
     position: 'bottomright'
 }).addTo(map);
 
-// OpenStreetMap tile layer (CARTO tiles now return an "API KEY REQUIRED" placeholder)
-const baseMapLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
+// Esri Light Gray Canvas: a near-white, minimal base map. CARTO tiles now need an API key
+// and OpenStreetMap blocks requests without a Referer (e.g. a page opened from file://).
+const baseMapLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 19,
+    maxNativeZoom: 16
+}).addTo(map);
+
+// Place, road and border labels are a separate Esri layer drawn on top of the base
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    maxNativeZoom: 16
 }).addTo(map);
 
 // Store pins mapping so we can reference them
