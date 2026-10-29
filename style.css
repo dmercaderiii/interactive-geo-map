@@ -273,6 +273,15 @@ a, button, input[type=range], .leaflet-interactive, .leaflet-control-zoom-in, .l
     outline: none;
 }
 
+/* Export Actions Container */
+.export-actions {
+    display: flex;
+    gap: 10px;
+    align-self: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 /* Button Styles */
 .export-btn {
     background: linear-gradient(135deg, #10b981, #059669);
@@ -283,7 +292,6 @@ a, button, input[type=range], .leaflet-interactive, .leaflet-control-zoom-in, .l
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    align-self: center;
     box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
     transition: filter 0.2s, transform 0.1s;
 }
@@ -294,6 +302,12 @@ a, button, input[type=range], .leaflet-interactive, .leaflet-control-zoom-in, .l
 
 .export-btn:active {
     transform: scale(0.97);
+}
+
+/* GeoJSON button variant - blue/indigo */
+.export-btn.geojson-btn {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
 }
 
 .remove-btn {
