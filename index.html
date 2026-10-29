@@ -32,7 +32,10 @@
             <input type="text" id="search-input" placeholder="Search city, province, coordinates...">
             <button id="search-btn">Search</button>
         </div>
-        <button id="export-btn" class="export-btn hidden">Export Pins to CSV</button>
+        <div id="export-actions" class="export-actions hidden">
+            <button id="export-btn" class="export-btn">Export to CSV</button>
+            <button id="export-geojson-btn" class="export-btn geojson-btn">Export to GeoJSON</button>
+        </div>
         <div id="loading-spinner" class="spinner hidden"></div>
         <div id="search-error" class="error-msg hidden">Location not found.</div>
     </div>

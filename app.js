@@ -11,11 +11,18 @@ L.control.zoom({
     position: 'bottomright'
 }).addTo(map);
 
-// Use a premium-looking map tile layer (CartoDB Voyager)
-const baseMapLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
+// Esri Light Gray Canvas: a near-white, minimal base map. CARTO tiles now need an API key
+// and OpenStreetMap blocks requests without a Referer (e.g. a page opened from file://).
+const baseMapLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 19,
+    maxNativeZoom: 16
+}).addTo(map);
+
+// Place, road and border labels are a separate Esri layer drawn on top of the base
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    maxNativeZoom: 16
 }).addTo(map);
 
 // Store pins mapping so we can reference them
@@ -31,12 +38,14 @@ const searchBtn = document.getElementById('search-btn');
 const loadingSpinner = document.getElementById('loading-spinner');
 const errorMsg = document.getElementById('search-error');
 const exportBtn = document.getElementById('export-btn');
+const exportGeoJsonBtn = document.getElementById('export-geojson-btn');
+const exportActions = document.getElementById('export-actions');
 
 function updateExportButtonVisibility() {
     if (Object.keys(pins).length > 0) {
-        exportBtn.classList.remove('hidden');
+        exportActions.classList.remove('hidden');
     } else {
-        exportBtn.classList.add('hidden');
+        exportActions.classList.add('hidden');
     }
 }
 
@@ -228,6 +237,42 @@ exportBtn.addEventListener('click', () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+});
+
+// GeoJSON Export Feature
+exportGeoJsonBtn.addEventListener('click', () => {
+    const pinIds = Object.keys(pins);
+    if (pinIds.length === 0) return;
+
+    const featureCollection = {
+        type: 'FeatureCollection',
+        features: pinIds.map(id => {
+            const pin = pins[id];
+            const latLng = pin.marker.getLatLng();
+            return {
+                type: 'Feature',
+                // GeoJSON coordinates are [longitude, latitude]
+                geometry: {
+                    type: 'Point',
+                    coordinates: [Number(latLng.lng.toFixed(5)), Number(latLng.lat.toFixed(5))]
+                },
+                properties: {
+                    name: pin.locationName,
+                    radius_km: pin.radiusKm
+                }
+            };
+        })
+    };
+
+    const blob = new Blob([JSON.stringify(featureCollection, null, 2)], { type: 'application/geo+json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'pinned_locations.geojson');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 });
 
 // Theme Toggle Logic
