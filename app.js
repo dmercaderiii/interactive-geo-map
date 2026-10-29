@@ -38,12 +38,14 @@ const searchBtn = document.getElementById('search-btn');
 const loadingSpinner = document.getElementById('loading-spinner');
 const errorMsg = document.getElementById('search-error');
 const exportBtn = document.getElementById('export-btn');
+const exportGeoJsonBtn = document.getElementById('export-geojson-btn');
+const exportActions = document.getElementById('export-actions');
 
 function updateExportButtonVisibility() {
     if (Object.keys(pins).length > 0) {
-        exportBtn.classList.remove('hidden');
+        exportActions.classList.remove('hidden');
     } else {
-        exportBtn.classList.add('hidden');
+        exportActions.classList.add('hidden');
     }
 }
 
@@ -235,6 +237,42 @@ exportBtn.addEventListener('click', () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+});
+
+// GeoJSON Export Feature
+exportGeoJsonBtn.addEventListener('click', () => {
+    const pinIds = Object.keys(pins);
+    if (pinIds.length === 0) return;
+
+    const featureCollection = {
+        type: 'FeatureCollection',
+        features: pinIds.map(id => {
+            const pin = pins[id];
+            const latLng = pin.marker.getLatLng();
+            return {
+                type: 'Feature',
+                // GeoJSON coordinates are [longitude, latitude]
+                geometry: {
+                    type: 'Point',
+                    coordinates: [Number(latLng.lng.toFixed(5)), Number(latLng.lat.toFixed(5))]
+                },
+                properties: {
+                    name: pin.locationName,
+                    radius_km: pin.radiusKm
+                }
+            };
+        })
+    };
+
+    const blob = new Blob([JSON.stringify(featureCollection, null, 2)], { type: 'application/geo+json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'pinned_locations.geojson');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 });
 
 // Theme Toggle Logic
